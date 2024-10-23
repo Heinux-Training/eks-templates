@@ -1,0 +1,60 @@
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+    - name: Prometheus
+      type: prometheus
+      version: 1
+      url: http://prometheus-server:80
+      access: proxy
+dashboardProviders:
+  dashboardproviders.yaml:
+    apiVersion: 1
+    providers:
+    - name: 'default'
+      orgId: 1
+      folder: ''
+      type: file
+      disableDeletion: false
+      editable: true
+      options:
+        path: /var/lib/grafana/dashboards/default
+dashboards:
+  default:
+    capacity-dashboard:
+      url: https://karpenter.sh/preview/getting-started/getting-started-with-karpenter/karpenter-capacity-dashboard.json
+    performance-dashboard:
+      url: https://karpenter.sh/preview/getting-started/getting-started-with-karpenter/karpenter-performance-dashboard.json
+
+service:
+  enabled: true
+  type: ClusterIP
+  port: 80
+  targetPort: 3000
+  annotations: {}
+  labels: {}
+  portName: service
+
+ingress:
+  enabled: true
+  # For Kubernetes >= 1.18 you should specify the ingress-controller via the field ingressClassName
+  # See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress
+  ingressClassName: alb
+  # Values can be templated
+  annotations: 
+    alb.ingress.kubernetes.io/backend-protocol: HTTP
+    alb.ingress.kubernetes.io/certificate-arn: >-
+      arn:aws:acm:us-east-1:757641753030:certificate/b7c279cd-8658-4a08-8155-e1eb9786aa7b
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/scheme: internet-facing
+  labels:
+    application: "demo-app"
+    environment: "demo"
+  path: /
+  
+  # pathType is only for k8s >= 1.1=
+  pathType: Prefix
+
+  hosts:
+    - demo-grafana.heinux-training.net
