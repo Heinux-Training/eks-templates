@@ -1,4 +1,5 @@
 alertmanager:
+  enabled: false
   persistentVolume:
     enabled: false
 
@@ -6,6 +7,21 @@ server:
   fullnameOverride: prometheus-server
   persistentVolume:
     enabled: false
+
+# Exclude Fargate nodes for node exporter
+prometheus-node-exporter:
+  
+  # affinity: 
+  #   nodeAffinity:
+  #     requiredDuringSchedulingIgnoredDuringExecution:
+  #       nodeSelectorTerms:
+  #         - matchFields:
+  #             - key: metadata.name
+  #               operator: In
+  #               values:
+  #                 - target-host-name
+  nodeSelector:
+    karpenter.sh/initialized: "true"
 
 extraScrapeConfigs: |
     - job_name: karpenter

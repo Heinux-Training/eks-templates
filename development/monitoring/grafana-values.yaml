@@ -42,10 +42,12 @@ ingress:
   ingressClassName: alb
   # Values can be templated
   annotations: 
+    alb.ingress.kubernetes.io/actions.ssl-redirect: >-
+      {"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port":"443", "StatusCode": "HTTP_301"}}
     alb.ingress.kubernetes.io/backend-protocol: HTTP
     alb.ingress.kubernetes.io/certificate-arn: >-
       arn:aws:acm:us-east-1:757641753030:certificate/b7c279cd-8658-4a08-8155-e1eb9786aa7b
-    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}, {"HTTP": 80}]'
     alb.ingress.kubernetes.io/target-type: ip
     alb.ingress.kubernetes.io/scheme: internet-facing
   labels:
@@ -58,3 +60,11 @@ ingress:
 
   hosts:
     - demo-grafana.heinux-training.net
+  extraPaths:
+    - path: /
+      pathType: Prefix
+      backend:
+        service:
+          name: ssl-redirect
+          port:
+            name: use-annotation
